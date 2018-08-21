@@ -21,6 +21,22 @@
             android:layout_height="wrap_content" />
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/btn_whitelist"
+            android:text="Add whitelist"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+        <Button
+            android:layout_weight="1"
+            android:id="@+id/btn_authorized"
+            android:text="authorize"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
     <com.joey.xwebview.ui.XWebProgressBar
         android:id="@+id/progress_bar"
         android:visibility="gone"
