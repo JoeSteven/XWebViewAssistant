@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.github.dcendents.android-maven'
 
 android {
     compileSdkVersion 27
@@ -23,7 +24,7 @@ android {
     }
 }
 
-
+group = 'com.github.JoeSteven' // 最好是你的 github 名字
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'com.android.support:appcompat-v7:27.1.1'

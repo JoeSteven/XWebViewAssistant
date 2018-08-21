@@ -1,5 +1,7 @@
 # XWebViewAssistant 文档
 
+[![](https://jitpack.io/v/JoeSteven/XWebViewAssistant.svg)](https://jitpack.io/#JoeSteven/XWebViewAssistant)
+
 ### 概述
 
 XWebViewAssistant 提供给Android开发者更简单的WebView开发方式，基于Android原生`WebView`，轻量封装相关操作
@@ -26,11 +28,28 @@ XWebViewAssistant 提供给Android开发者更简单的WebView开发方式，基
 
 **该sample的前端调试页面放在asset目录中，你也可以在接入该库的时候使用这个页面进行本地调试，该页面由猴哥-[Jaeger](https://github.com/laobie) 友情赞助**
 
-![sample](./sample.jpeg)
+<img src="./sample.jpeg" width=50% height=50% />
 
 ### 依赖
 
+在根目录build.gradle下添加代码
 
+```groovy
+allprojects {
+	repositories {
+		...
+		maven { url 'https://jitpack.io' }
+	}
+}
+```
+
+在项目build.gradle
+
+```java
+dependencies {
+	implementation 'com.github.JoeSteven:XWebViewAssistant:1.0'
+}
+```
 
 ### 使用
 
