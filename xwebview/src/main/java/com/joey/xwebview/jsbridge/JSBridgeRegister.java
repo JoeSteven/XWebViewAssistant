@@ -1,5 +1,6 @@
 package com.joey.xwebview.jsbridge;
 
+import android.net.Uri;
 import android.util.LruCache;
 
 import com.joey.xwebview.jsbridge.method.XJavaMethod;
@@ -9,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * Description: register Java Method for JS and register white list
@@ -19,6 +21,7 @@ public class JSBridgeRegister {
     private HashMap<String, Class<? extends XJavaMethod>> javaMethod;
     private LruCache<String, XJavaMethod> javaMethodCache;
     private List<String> whiteList;
+    private List<Pattern> whiteListPattern;
     private IMethodInitializer initializer;
     public interface IMethodInitializer{
         /**
@@ -31,6 +34,7 @@ public class JSBridgeRegister {
     private JSBridgeRegister() {
         javaMethod = new HashMap<>();
         whiteList = new ArrayList<>();
+        whiteListPattern = new ArrayList<>();
     }
 
     /**
@@ -66,11 +70,21 @@ public class JSBridgeRegister {
         return this;
     }
 
+    public JSBridgeRegister whiteList(Pattern pattern) {
+        whiteListPattern.add(pattern);
+        return this;
+    }
+
     /**
      * is host in white list
      */
-    public boolean isInWhiteList(String host) {
-        return whiteList.contains(host);
+    public boolean isInWhiteList(String url) {
+        Uri uri = Uri.parse(url);
+        if (whiteList.contains(uri.getHost())) return true;
+        for (Pattern pattern : whiteListPattern) {
+            if (pattern.matcher(url).matches()) return true;
+        }
+        return false;
     }
 
     /**

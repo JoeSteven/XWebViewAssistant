@@ -20,13 +20,16 @@ import com.joey.xwebview.XWebView;
 import com.joey.xwebview.jsbridge.JSBridgeRegister;
 import com.joey.xwebview.ui.IWebTitle;
 
+import java.util.regex.Pattern;
+
 public class SampleActivity extends AppCompatActivity implements IWebTitle {
 
     private XWebView webView;
     private EditText etUrl;
     private EditText etJs;
-    private String authorized;
+    private boolean authorized;
     private String whiteList;
+    private Pattern whiteListPattern;
     private Button btnWhiteList;
     private Button btnAuthorized;
 
@@ -43,39 +46,21 @@ public class SampleActivity extends AppCompatActivity implements IWebTitle {
                 .setCacheMode(WebSettings.LOAD_NO_CACHE)
                 .setProgressEnable(findViewById(R.id.progress_bar))
                 .setJSBridgeUrlEnabled(register(), new JSBridgeUrlParser())
-                .setJSBridgeAuthorizedChecker(this::isAuthorized);
+                .setJSBridgeAuthorizedChecker(this::isAuthorized)
+                .loadUrl("file:///android_asset/index.html");
 
-        findViewById(R.id.btn_load).setOnClickListener(v -> webView.loadUrl(etUrl.getText().toString()));
-        findViewById(R.id.btn_input).setOnClickListener(v-> webView.invokeJavaScript("msg", etJs.getText().toString()));
+        etUrl.setText("file:///android_asset/index.html");
+        findViewById(R.id.btn_load).setOnClickListener(this::load);
+        findViewById(R.id.btn_input).setOnClickListener(v->
+                webView.invokeJavaScript("msg", etJs.getText().toString()));
         btnWhiteList = findViewById(R.id.btn_whitelist);
         btnWhiteList.setOnClickListener(this::addWhiteList);
         btnAuthorized = findViewById(R.id.btn_authorized);
         btnAuthorized.setOnClickListener(this::authorized);
     }
 
-    private void authorized(View view) {
-        if (TextUtils.isEmpty(authorized)) {
-            authorized = Uri.parse(etUrl.getText().toString()).getHost();
-            btnAuthorized.setText("UnAuthorize");
-        } else {
-            authorized = null;
-            btnAuthorized.setText("Authorize");
-        }
-    }
-
-    private void addWhiteList(View view) {
-        if (TextUtils.isEmpty(whiteList)) {
-            whiteList = Uri.parse(etUrl.getText().toString()).getHost();
-            btnWhiteList.setText("remove whitelist");
-        } else {
-            whiteList = null;
-            btnWhiteList.setText("add whitelist");
-        }
-        webView.setJSBridgeUrlEnabled(register(), new JSBridgeUrlParser());
-    }
-
     private boolean isAuthorized(String javafunc, String url) {
-        return TextUtils.equals(authorized, Uri.parse(url).getHost());
+        return authorized;
     }
 
     private JSBridgeRegister register() {
@@ -89,6 +74,8 @@ public class SampleActivity extends AppCompatActivity implements IWebTitle {
                 });
         if (!TextUtils.isEmpty(whiteList)) {
             register.whiteList(whiteList);
+        } else if(whiteListPattern != null) {
+            register.whiteList(whiteListPattern);
         }
         return register;
     }
@@ -108,4 +95,48 @@ public class SampleActivity extends AppCompatActivity implements IWebTitle {
         }
     }
 
+    private void load(View view) {
+        whiteList = "ddd";
+        whiteListPattern = Pattern.compile(".*");
+        authorized = false;
+        addWhiteList(view);
+        authorized(view);
+        webView.loadUrl(etUrl.getText().toString());
+    }
+
+    private void authorized(View view) {
+        if (!authorized) {
+            authorized = true;
+            btnAuthorized.setText("UnAuthorize");
+        } else {
+            authorized = false;
+            btnAuthorized.setText("Authorize");
+        }
+    }
+
+    private void addWhiteList(View view) {
+        if (webView.webView().getUrl().contains("android_asset")) {
+            if (whiteListPattern == null) {
+                whiteList = null;
+                whiteListPattern = Pattern.compile("file:///android_asset.*");
+                btnWhiteList.setText("remove whitelist");
+            } else {
+                whiteListPattern = null;
+                btnWhiteList.setText("add whitelist");
+            }
+
+        }else {
+            if (TextUtils.isEmpty(whiteList)) {
+                whiteListPattern = null;
+                whiteList = Uri.parse(etUrl.getText().toString()).getHost();
+                btnWhiteList.setText("remove whitelist");
+            } else {
+                whiteList = null;
+                btnWhiteList.setText("add whitelist");
+            }
+        }
+
+        webView.setJSBridgeUrlEnabled(register(), new JSBridgeUrlParser())
+                .setJSBridgeAuthorizedChecker(this::isAuthorized);
+    }
 }

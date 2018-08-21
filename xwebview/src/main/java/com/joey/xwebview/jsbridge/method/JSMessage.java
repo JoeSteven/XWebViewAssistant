@@ -10,14 +10,14 @@ import org.json.JSONObject;
 public class JSMessage {
     public JSMessage(String url, String callback, String errorCallback,
                      String javaFunc, JSONObject params) {
-        this.url = url;
+        this.hostUrl = url;
         this.callback = callback;
         this.errorCallback = errorCallback;
         this.javaMethod = javaFunc;
         this.params = params;
     }
 
-    public String url;// the website url that invoke Java method
+    public String hostUrl;// the website hostUrl that invoke Java method
     public String callback;// callback func for JS
     public String errorCallback;// error callback func for JS
     public String javaMethod;// Java method to invoke
@@ -26,7 +26,7 @@ public class JSMessage {
     @Override
     public String toString() {
         return "JSMessage{" +
-                "url='" + url + '\'' +
+                "hostUrl='" + hostUrl + '\'' +
                 ", callback='" + callback + '\'' +
                 ", errorCallback='" + errorCallback + '\'' +
                 ", javaMethod='" + javaMethod + '\'' +

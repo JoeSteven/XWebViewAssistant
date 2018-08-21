@@ -23,6 +23,6 @@ public class JSToastAuthorized extends JSToast{
 
     @Override
     public Permission permission() {
-        return Permission.PUBLIC;
+        return Permission.AUTHORIZED;
     }
 }

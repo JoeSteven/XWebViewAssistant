@@ -15,12 +15,12 @@ import org.json.JSONObject;
  */
 public class JSBridgeUrlParser implements IJSBridgeUrlParser{
     @Override
-    public JSMessage parse(String url) {
-        if (!url.startsWith("Xwebview")) return null;
+    public JSMessage parse(String hostUrl, String url) {
+        if (!url.startsWith("xwebview")) return null;
         Uri uri = Uri.parse(url);
         try {
             JSONObject params = new JSONObject(uri.getQueryParameter("params"));
-        return new JSMessage(url,
+        return new JSMessage(hostUrl,
                 uri.getQueryParameter("callback"),
                 uri.getQueryParameter("error_callback"),
                 uri.getQueryParameter("func"),

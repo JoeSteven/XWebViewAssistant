@@ -10,6 +10,24 @@ XWebViewAssistant 提供给Android开发者更简单的WebView开发方式，基
 - 支持`JSBridge` ，拦截URL或者`onJsPrompt`都的方式二选一（官方注解的方式本身不需要封装，如果使用注解的方式，关闭本库的`JSBridge`功能即可
 - `JSBridge` 注册的Java方法支持权限管理，支持双向调用及回调
 
+### Sample
+
+- 可以通过输入框输入url进行加载
+
+
+- add whitelist 和 authorize  这两个按钮分别可以将当前网站加入到白名单或者方法授权
+
+
+- function: 后面有三个注册的Java方法，分别对应三种不同的权限，public都可以调用，private需要加入白名单可调用， authorized需要白名单或者授权可以调用。
+
+
+- params：后面为三个方法的参数，json格式
+- 最底部输入框为Java调用 js的sample
+
+**该sample的前端调试页面放在asset目录中，你也可以在接入该库的时候使用这个页面进行本地调试，该页面由猴哥-[Jaeger](https://github.com/laobie) 友情赞助**
+
+![sample](./sample.jpeg)
+
 ### 依赖
 
 
@@ -133,8 +151,8 @@ JSBridgeRegister register = JSBridgeRegister.create()
 		.register("toast", JSToast.class)// js 约定的方法名及真实方法
 		.register("login", JSLogin.class)
 		.register("user_info", JSUserInfo.class)
-		.whiteList("api.xwebview.com")// 设置域名白名单
-		.whiteList("api.xwebview.cn");
+		.whiteList("api.xwebview.com")// 设置域名白名单,支持两种方式，域名白名单，或者是正则匹配
+		.whiteListPattern(Pattern.compile("file:///android_asset.*"));
 ```
 
 - `IMethodInitializer` 方法初始化器
@@ -163,7 +181,7 @@ public interface IJSBridgePromptParser {
 
 // 满足协议则返回一个 JSMessage 对象，否则返回null
 public class JSMessage {
-    public String url;// 调用该方法的网页url，可选
+    public String hostUrl;// 调用该方法的网页url，可选
     public String callback;// 执行成功后需要回调的JS函数,可选
     public String errorCallback;// 异常发生时回调的JS函数，可选
     public String javaMethod;// 要调用的Java方法，必须

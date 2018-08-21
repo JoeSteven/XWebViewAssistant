@@ -10,5 +10,5 @@ import com.joey.xwebview.jsbridge.method.JSMessage;
  * date:2018/8/20
  */
 public interface IJSBridgePromptParser {
-    JSMessage parse(String url, String message, String defaultValue, JsPromptResult result);
+    JSMessage parse(String hostUrl, String url, String message, String defaultValue, JsPromptResult result);
 }

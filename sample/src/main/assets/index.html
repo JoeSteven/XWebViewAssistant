@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>JSBridge Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        button {
+            display: block;
+            padding: 10px 20px;
+            margin: 10px 20px;
+            background: rgb(39, 147, 248);
+            border-radius: 4px;
+            color: white;
+            outline: none;
+            border: none;
+        }
+
+        button:active {
+            background: rgb(7, 120, 224);
+        }
+
+        input {
+            display: block;
+            background: lightblue;
+            margin: 10px 0;
+            padding: 5px;
+        }
+
+        .input_wrapper {
+            margin: 10px 20px;
+        }
+    </style>
+    <script type="text/javascript">
+        function callJava(callback, error_callback) {
+            let fuction_name = document.getElementById('input_fuction').value
+            let params = document.getElementById('input_params').value
+
+            let url =
+                `Xwebview://call_java/?callback=${callback||'successCallback'}&error_callback=${error_callback||'errorCallback'}&func=${fuction_name}&params=${params||'{}'}`
+            console.log(url)
+            window.location = url
+        }
+
+        function successCallback() {
+            alert("success callback!");
+        }
+
+        function errorCallback() {
+            alert("error callback!");
+        }
+
+        function msg(msg) {
+            document.getElementById('input_msg').value = msg
+        }
+    </script>
+
+
+</head>
+
+<body>
+    <h3 style="text-align:center">JSBridge Demo</h3>
+
+    <div class="input_wrapper">
+        <div>input fuction name</div>
+        <input id="input_fuction" />
+    </div>
+
+    <div class="input_wrapper">
+        <div>input params</div>
+        <textarea id="input_params"></textarea>
+    </div>
+
+    <button onclick="callJava()">call java</button>
+    <!-- <button>toast_public</button> -->
+    <!-- <button>toast_authorize</button> -->
+
+    <div class="input_wrapper">
+        <div>receive msg</div>
+        <input id="input_msg" />
+    </div>
+</body>
+
+</html>

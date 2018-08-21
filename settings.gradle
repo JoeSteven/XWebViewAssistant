@@ -1,1 +1,1 @@
-include ':app', ':xwebview'
+include ':sample', ':xwebview'

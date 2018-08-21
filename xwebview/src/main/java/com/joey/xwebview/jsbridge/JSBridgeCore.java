@@ -37,7 +37,7 @@ public class JSBridgeCore {
     }
 
     /**
-     * parse url to JSMessage
+     * parse hostUrl to JSMessage
      */
     public void setUrlParser(IJSBridgeUrlParser parser){
         if (promptParser != null){
@@ -53,7 +53,7 @@ public class JSBridgeCore {
      */
     public void setPromptParser(IJSBridgePromptParser parser){
         if (urlParser != null){
-            XWebLog.error(new JSBridgeException("already choose intercept url to achieve JSBridge!"));
+            XWebLog.error(new JSBridgeException("already choose intercept hostUrl to achieve JSBridge!"));
             return;
         }
         promptParser = parser;
@@ -74,9 +74,9 @@ public class JSBridgeCore {
     public boolean checkJsBridge(String url, String message, String defaultValue, JsPromptResult result) {
         JSMessage msg = null;
         if (urlParser != null) {
-            msg = urlParser.parse(url);
+            msg = urlParser.parse(webView.webView().getUrl(), url);
         } else if(promptParser != null) {
-            msg = promptParser.parse(url, message, defaultValue, result);
+            msg = promptParser.parse(webView.webView().getUrl(), url, message, defaultValue, result);
         }
         if (msg == null) return false;
         invokeJavaMethod(msg);
@@ -121,21 +121,20 @@ public class JSBridgeCore {
         }
         switch (method.permission()) {
             case PRIVATE:
-                Uri uri = Uri.parse(message.url);
-                if (jsBridgeRegister.isInWhiteList(uri.getHost())) {
+                if (jsBridgeRegister.isInWhiteList(message.hostUrl)) {
                     method.invoke(message, webView);
                 } else {
                     XWebLog.error(new JSBridgeException("Java method:" + message.javaMethod +
-                            " is private, host:" + uri.getHost() +
+                            " is private, host:" + message.hostUrl +
                             " don't have permission, add host in white list to invoke private method!"));
                 }
                 break;
             case AUTHORIZED:
-                if (authorizedChecker.isAuthorized(message.javaMethod, message.url)) {
+                if (authorizedChecker.isAuthorized(message.javaMethod, message.hostUrl) || jsBridgeRegister.isInWhiteList(message.hostUrl)) {
                     method.invoke(message, webView);
                 } else {
                     XWebLog.error(new JSBridgeException("Java method:" + message.javaMethod +
-                            " permission is Authorized, url:" + message.url +
+                            " permission is Authorized, hostUrl:" + message.hostUrl +
                             " don't have permission, check you AuthorizedChecker!"));
                 }
                 break;
