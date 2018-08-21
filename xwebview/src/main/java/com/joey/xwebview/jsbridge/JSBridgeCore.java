@@ -94,7 +94,9 @@ public class JSBridgeCore {
                 .append("(");
         if (params != null) {
             for (int i = 0; i < params.length; i++) {
-                stringBuilder.append(params[0]);
+                stringBuilder.append("'");
+                stringBuilder.append(params[i]);
+                stringBuilder.append("'");
                 if (i < params.length - 1) {
                     stringBuilder.append(",");
                 }
@@ -146,6 +148,10 @@ public class JSBridgeCore {
 
     public void release() {
         jsBridgeRegister.release();
+        authorizedChecker = null;
+        urlParser = null;
+        promptParser = null;
+        webView = null;
     }
 
 }

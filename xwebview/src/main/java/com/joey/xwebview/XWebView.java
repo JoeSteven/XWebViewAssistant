@@ -15,6 +15,7 @@ import com.joey.xwebview.jsbridge.IJSBridgePromptParser;
 import com.joey.xwebview.jsbridge.IJSBridgeUrlParser;
 import com.joey.xwebview.jsbridge.JSBridgeCore;
 import com.joey.xwebview.jsbridge.JSBridgeRegister;
+import com.joey.xwebview.jsbridge.method.IAuthorizedChecker;
 import com.joey.xwebview.ui.IWebProgress;
 import com.joey.xwebview.ui.IWebTitle;
 
@@ -43,7 +44,6 @@ public class XWebView implements LifecycleObserver, IWebProgress, IWebTitle {
 
     private void initWebView() {
         setJavaScriptEnabled(true)
-                .setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK)
                 .setDomStorageEnable(true)
                 .setWebViewClient(new XWebViewClient())
                 .setWebChromeClient(new XWebChromeClient());
@@ -122,6 +122,11 @@ public class XWebView implements LifecycleObserver, IWebProgress, IWebTitle {
         return this;
     }
 
+    public XWebView setJSBridgeAuthorizedChecker(IAuthorizedChecker checker) {
+        jsBridgeCore.setAuthorizedChecker(checker);
+        return this;
+    }
+
     public XWebView setJavaScriptEnabled(boolean enable) {
         webView().getSettings().setJavaScriptEnabled(enable);
         return this;
@@ -185,6 +190,9 @@ public class XWebView implements LifecycleObserver, IWebProgress, IWebTitle {
         if (jsBridgeCore != null) jsBridgeCore.release();
         webView().removeAllViews();
         webView().destroy();
+        webProgress = null;
+        webTitle = null;
+        jsBridgeCore = null;
     }
 
     @Override

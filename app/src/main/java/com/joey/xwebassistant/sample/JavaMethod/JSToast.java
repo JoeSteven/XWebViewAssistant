@@ -20,11 +20,16 @@ public class JSToast extends XJavaMethod{
 
     @Override
     public void call(JSMessage message) {
-        if (context != null) Toast.makeText(context, message.params.optString("message"), Toast.LENGTH_SHORT).show();
+        if (context != null){
+            Toast.makeText(context, message.params.optString("message"), Toast.LENGTH_SHORT).show();
+            callback(message.callback, "call JSToast success");
+        } else {
+            callError(message.errorCallback, "call JSToast failed! context is null!");
+        }
     }
 
     @Override
     public Permission permission() {
-        return Permission.PRIVATE;
+        return Permission.PUBLIC;
     }
 }

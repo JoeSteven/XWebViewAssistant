@@ -8,7 +8,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.webkit.WebSettings;
 import android.widget.EditText;
 
-import com.joey.xwebassistant.sample.JavaMethod.JSLog;
 import com.joey.xwebassistant.sample.JavaMethod.JSToast;
 import com.joey.xwebview.XWebView;
 import com.joey.xwebview.jsbridge.JSBridgeRegister;
@@ -18,6 +17,7 @@ public class SampleActivity extends AppCompatActivity implements IWebTitle {
 
     private XWebView webView;
     private EditText etUrl;
+    private EditText etJs;
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -25,24 +25,21 @@ public class SampleActivity extends AppCompatActivity implements IWebTitle {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample);
         etUrl = findViewById(R.id.et_url);
-
-        findViewById(R.id.btn_load).setOnClickListener(v -> webView.loadUrl(etUrl.getText().toString()));
+        etJs = findViewById(R.id.et_js);
 
         webView = XWebView.with(findViewById(R.id.wv), this)
                 .setWebTitleEnable(this)
-                .setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW)
+                .setCacheMode(WebSettings.LOAD_NO_CACHE)
                 .setProgressEnable(findViewById(R.id.progress_bar))
-                .setJSBridgeUrlEnabled(register(), new JSBridgeUrlParser())
-                .loadUrl("https://www.joey.com");
+                .setJSBridgeUrlEnabled(register(), new JSBridgeUrlParser());
 
-        webView.invokeJavaScript("log", "hi, this is java");
+        findViewById(R.id.btn_load).setOnClickListener(v -> webView.loadUrl(etUrl.getText().toString()));
+        findViewById(R.id.btn_input).setOnClickListener(v-> webView.invokeJavaScript("msg", etJs.getText().toString()));
     }
 
     private JSBridgeRegister register() {
         return JSBridgeRegister.create()
                 .register("toast", JSToast.class)
-                .register("log", JSLog.class)
-                .whiteList("www.joey.com")
                 .setMethodInitializer((func, method) -> {
                     if (method instanceof JSToast)
                         ((JSToast) method).setContext(SampleActivity.this);

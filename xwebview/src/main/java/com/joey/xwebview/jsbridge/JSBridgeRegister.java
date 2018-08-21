@@ -78,7 +78,9 @@ public class JSBridgeRegister {
      */
     public XJavaMethod findMethod(String funcName) {
         if (javaMethodCache == null) {
-            javaMethodCache = new LruCache<>(javaMethod.size()/2);
+            int maxSize = javaMethod.size()/2;
+            if (maxSize <= 0) maxSize = 1;
+            javaMethodCache = new LruCache<>(maxSize);
         }
         XJavaMethod method = javaMethodCache.get(funcName);
 
