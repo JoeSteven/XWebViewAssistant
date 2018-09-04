@@ -11,8 +11,6 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import com.joey.xwebview.jsbridge.IJSBridgePromptParser;
-import com.joey.xwebview.jsbridge.IJSBridgeUrlParser;
 import com.joey.xwebview.jsbridge.JSBridgeCore;
 import com.joey.xwebview.jsbridge.JSBridgeRegister;
 import com.joey.xwebview.jsbridge.method.IAuthorizedChecker;
@@ -110,15 +108,9 @@ public class XWebView implements LifecycleObserver, IWebProgress, IWebTitle {
         return this;
     }
 
-    public XWebView setJSBridgeUrlEnabled(JSBridgeRegister register, IJSBridgeUrlParser parser) {
+    public XWebView setJSBridgeEnabled(JSBridgeRegister register, String schema) {
         jsBridgeCore = new JSBridgeCore(register, this);
-        jsBridgeCore.setUrlParser(parser);
-        return this;
-    }
-
-    public XWebView setJSBridgePromptEnabled(JSBridgeRegister register, IJSBridgePromptParser parser) {
-        jsBridgeCore = new JSBridgeCore(register, this);
-        jsBridgeCore.setPromptParser(parser);
+        jsBridgeCore.setBridgeSchema(schema);
         return this;
     }
 

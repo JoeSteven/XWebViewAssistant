@@ -32,6 +32,7 @@ public class SampleActivity extends AppCompatActivity implements IWebTitle {
     private Pattern whiteListPattern;
     private Button btnWhiteList;
     private Button btnAuthorized;
+    private final String SCHEMA = "xwebview";
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -45,7 +46,7 @@ public class SampleActivity extends AppCompatActivity implements IWebTitle {
                 .setWebTitleEnable(this)
                 .setCacheMode(WebSettings.LOAD_NO_CACHE)
                 .setProgressEnable(findViewById(R.id.progress_bar))
-                .setJSBridgeUrlEnabled(register(), new JSBridgeUrlParser())
+                .setJSBridgeEnabled(register(), SCHEMA)
                 .setJSBridgeAuthorizedChecker(this::isAuthorized)
                 .loadUrl("file:///android_asset/index.html");
 
@@ -136,7 +137,7 @@ public class SampleActivity extends AppCompatActivity implements IWebTitle {
             }
         }
 
-        webView.setJSBridgeUrlEnabled(register(), new JSBridgeUrlParser())
+        webView.setJSBridgeEnabled(register(), SCHEMA)
                 .setJSBridgeAuthorizedChecker(this::isAuthorized);
     }
 }

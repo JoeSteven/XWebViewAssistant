@@ -1,6 +1,5 @@
 package com.joey.xwebview;
 
-import android.webkit.JsPromptResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 
@@ -22,10 +21,4 @@ public class XWebChromeClient extends WebChromeClient{
         xWebView.onProgressChanged(newProgress);
     }
 
-    @Override
-    public boolean onJsPrompt(WebView view, String url, String message, String defaultValue, JsPromptResult result) {
-        return xWebView.JSBridge() != null
-                && xWebView.JSBridge().isEnableJsForPrompt()
-                && xWebView.JSBridge().checkJsBridge(url, message, defaultValue, result);
-    }
 }

@@ -19,8 +19,7 @@ public class XWebViewClient extends WebViewClient{
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
         return xWebView.JSBridge() != null
-                && xWebView.JSBridge().isEnableJSForUrl()
-                && xWebView.JSBridge().checkJsBridge(url, null, null, null);
+                && xWebView.JSBridge().checkJsBridge(url);
 
     }
 

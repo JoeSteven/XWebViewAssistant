@@ -1,6 +1,10 @@
 package com.joey.xwebview.jsbridge;
 
-import android.net.Uri;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.text.TextUtils;
+import android.util.Base64;
 import android.webkit.JsPromptResult;
 
 import com.joey.xwebview.XWebView;
@@ -11,17 +15,30 @@ import com.joey.xwebview.jsbridge.method.JSMessage;
 import com.joey.xwebview.jsbridge.method.XJavaMethod;
 import com.joey.xwebview.log.XWebLog;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Description: core class for JS bridge
  * author:Joey
  * date:2018/8/20
  */
 public class JSBridgeCore {
+    private final String DISPATCH_MSG = "://dispatch_js_message/";
+    private final String FETCH_QUEUE = "://fetch_message_queue/";
+    private final String JS_FUNC_FETCH_QUEUE = "fetch_queue";
+    private final int MSG_INVOKE_JAVA = 1;
     private JSBridgeRegister jsBridgeRegister;
     private XWebView webView;
     private IAuthorizedChecker authorizedChecker = new DefaultAuthorizedChecker();
-    private IJSBridgeUrlParser urlParser;
-    private IJSBridgePromptParser promptParser;
+    private String bridgeSchema;
+    private Handler handler = new Handler(Looper.getMainLooper()) {
+        @Override
+        public void handleMessage(Message msg) {
+            if (msg.what == MSG_INVOKE_JAVA) invokeJavaMethod((JSMessage) msg.obj);
+        }
+    };
 
 
     public JSBridgeCore(JSBridgeRegister jsBridgeRegister, XWebView webView) {
@@ -36,56 +53,38 @@ public class JSBridgeCore {
         this.authorizedChecker = checker;
     }
 
-    /**
-     * parse hostUrl to JSMessage
-     */
-    public void setUrlParser(IJSBridgeUrlParser parser){
-        if (promptParser != null){
-            XWebLog.error(new JSBridgeException("already choose onJsPrompt to achieve JSBridge!"));
-            return;
-        }
-        urlParser = parser;
+    public void setBridgeSchema(String schema) {
+        this.bridgeSchema = schema;
     }
 
     /**
-     * parse js prompt to JSMessage
-     * @param parser
+     * check scheme to handle Js message
+     * @param url
+     * @return
      */
-    public void setPromptParser(IJSBridgePromptParser parser){
-        if (urlParser != null){
-            XWebLog.error(new JSBridgeException("already choose intercept hostUrl to achieve JSBridge!"));
-            return;
+    public boolean checkJsBridge(String url) {
+        if (!url.startsWith(bridgeSchema)) return false;
+        if ((bridgeSchema + DISPATCH_MSG).equals(url)) {
+            // xwebview://dispatch_js_message/  get msg queue from JS
+            invokeJavaScript(JS_FUNC_FETCH_QUEUE);
+            return true;
+        } else if (url.startsWith(bridgeSchema + FETCH_QUEUE)) {
+            // xwebview://fetch_message_queue/&[{},{}]
+            int index = url.indexOf("&");
+            if (index < 0) return true;
+            String msg = url.substring(index + 1);
+            if (!TextUtils.isEmpty(msg)) {
+                parseJSMessage(msg);
+            }
+            return true;
         }
-        promptParser = parser;
-    }
-
-
-    public boolean isEnableJSForUrl() {
-        return urlParser != null;
-    }
-
-    public boolean isEnableJsForPrompt() {
-        return promptParser != null;
-    }
-
-    /**
-     * is js bridge message
-     */
-    public boolean checkJsBridge(String url, String message, String defaultValue, JsPromptResult result) {
-        JSMessage msg = null;
-        if (urlParser != null) {
-            msg = urlParser.parse(webView.webView().getUrl(), url);
-        } else if(promptParser != null) {
-            msg = promptParser.parse(webView.webView().getUrl(), url, message, defaultValue, result);
-        }
-        if (msg == null) return false;
-        invokeJavaMethod(msg);
-        return true;
+        return false;
     }
 
     /**
      * invoke JS method
-     * @param func JavaScript func
+     *
+     * @param func   JavaScript func
      * @param params params for this func
      */
     public void invokeJavaScript(String func, String... params) {
@@ -108,6 +107,32 @@ public class JSBridgeCore {
             webView.loadUrl(method);
         }
     }
+
+    /**
+     * parse msg to JSMessage
+     * @param msg
+     */
+    private void parseJSMessage(String msg) {
+        try {
+            JSONArray msgs = new JSONArray(new String(Base64.decode(msg, Base64.NO_WRAP)));
+            int length = msgs.length();
+            for (int i = 0; i < length ; i++) {
+                JSONObject jsonMsg = msgs.getJSONObject(i);
+                JSMessage jsMessage = new JSMessage();
+                jsMessage.hostUrl = webView.webView().getUrl();
+                jsMessage.callbackID = jsonMsg.optString("callback_id");
+                jsMessage.javaMethod = jsonMsg.optString("func");
+                jsMessage.params = jsonMsg.optJSONObject("params");
+                Message dispatchMsg = Message.obtain();
+                dispatchMsg.what = MSG_INVOKE_JAVA;
+                dispatchMsg.obj = jsMessage;
+                handler.sendMessage(dispatchMsg);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     /**
      * JavaScript invoke Java method
@@ -147,10 +172,10 @@ public class JSBridgeCore {
 
     public void release() {
         jsBridgeRegister.release();
+        handler.removeCallbacksAndMessages(null);
         authorizedChecker = null;
-        urlParser = null;
-        promptParser = null;
         webView = null;
+        handler = null;
     }
 
 }

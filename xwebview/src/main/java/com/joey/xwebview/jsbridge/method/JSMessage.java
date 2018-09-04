@@ -8,18 +8,10 @@ import org.json.JSONObject;
  * date:2018/8/20
  */
 public class JSMessage {
-    public JSMessage(String url, String callback, String errorCallback,
-                     String javaFunc, JSONObject params) {
-        this.hostUrl = url;
-        this.callback = callback;
-        this.errorCallback = errorCallback;
-        this.javaMethod = javaFunc;
-        this.params = params;
-    }
+    public JSMessage() {}
 
     public String hostUrl;// the website hostUrl that invoke Java method
-    public String callback;// callback func for JS
-    public String errorCallback;// error callback func for JS
+    public String callbackID;// callback id register by js
     public String javaMethod;// Java method to invoke
     public JSONObject params;// params for Java method
 
@@ -27,8 +19,7 @@ public class JSMessage {
     public String toString() {
         return "JSMessage{" +
                 "hostUrl='" + hostUrl + '\'' +
-                ", callback='" + callback + '\'' +
-                ", errorCallback='" + errorCallback + '\'' +
+                ", callbackID=" + callbackID +
                 ", javaMethod='" + javaMethod + '\'' +
                 ", params=" + params +
                 '}';
