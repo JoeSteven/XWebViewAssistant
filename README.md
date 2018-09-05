@@ -7,8 +7,7 @@ XWebViewAssistant 提供给Android开发者更简单的WebView开发方式，基
 - 链式调用，初始化`WebView` 更简洁
 - 无`Activity`或者`Fragment` 基类，不需要继承，在任何页面都可以直接使用
 - 自动绑定生命周期，无需手动操作，避免内存泄露
-- 支持`JSBridge` ，拦截URL或者`onJsPrompt`都的方式二选一（官方注解的方式本身不需要封装，如果使用注解的方式，关闭本库的`JSBridge`功能即可
-- `JSBridge` 注册的Java方法支持权限管理，支持双向调用及回调
+- 支持`JSBridge` ，内部实现为`@JavascriptInterface` ，提供权限校验，前端回调管理，支持同步和异步回调
 - 支持 Cookie 同步
 
 ### 依赖

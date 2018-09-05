@@ -1,28 +1,37 @@
 # JsBridge 模块
 
-**注意：如果最低支持API高于19，请直接使用Android官方提供的方式，效率更高，另外本库的jsbridge方式需要优化为队列方式，请暂时不要使用本库到商业项目中**
+**注意：本库底层实现为 @JavascriptInterface 的方式因此只支持到minsdk-18，截止到今天（2018.9.5）minsdk-18 已覆盖90%手机。这种方式相比拦截URL的方式效率上高得多，耗时更低**
 本库采用注册的方式来给前端页面提供 Java 方法，尽量实现每个方法逻辑单一，可复用，便于权限管理提供安全性
 
 ### 1.实现 Java 方法
 
+提供给 JS 调用的方法需要继承 `XJavaMethod` ，实现两个方法，`call` 和`permission`。
+
+在 `call` 中执行业务代码
+
+- 支持以抛异常的方式来回调前端
+- 同步回调，直接返回 `calbackParams` ，将回调所需要的数据放在该 Json 对象中
+- return null ，不回调，**如果前端页面注册了回调函数，请务必回调，避免前端页内存泄露**
+- 异步回调，在同步代码中return null，然后在异步代码块中调用`callback` 或者`callError` 来分别回调
+
 ```java
-public class ExampleMethod extends XJavaMethod{
+public class JSToastPublic extends XJavaMethod{
 
     @Override
-    public void call(JSMessage message) {
-        //doSomething here
-      JsonObject params = message.params
-        
-      // 执行成功后需要回调，则调用该方法，回调js函数由前端提供，参数为双方约定
-      callback(message.callback, "success");
+    public JSONObject call(JSMessage message, JSONObject callbackParams) throws Exception{ 
+      if (TextUtils.isEmpty(message.params.optString("message"))) 
+        throw new Exception("no message found from js");
       
-      // 异常回调
-      callError(message.errorCallback," error");
+        Toast.makeText(context, 
+                       message.params.optString("message"),
+                       Toast.LENGTH_SHORT).show();
+      
+      // 同步回调
+        return callbackParams.put("message", "invoke JSToastPublic success");
     }
 
     @Override
     public Permission permission() {
-      // 标记该方法的权限
         return Permission.PUBLIC;
     }
 }
