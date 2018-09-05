@@ -5,7 +5,6 @@ import android.util.LruCache;
 
 import com.joey.xwebview.jsbridge.method.XJavaMethod;
 
-import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

@@ -1,7 +1,5 @@
 package com.joey.xwebview.jsbridge.method;
 
-import com.joey.xwebview.jsbridge.method.IAuthorizedChecker;
-
 /**
  * Description:
  * author:Joey
