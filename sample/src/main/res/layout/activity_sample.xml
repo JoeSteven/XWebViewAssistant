@@ -39,7 +39,7 @@
     </LinearLayout>
     <TextView
         android:textIsSelectable="true"
-        android:text="function: toast_public toast_private toast_authorized \n\n params: {&quot;message&quot;:&quot;input your content here&quot;}"
+        android:text="function: toast_public toast_private toast_authorized async_task\n\n params: {&quot;message&quot;:&quot;input your content here&quot;}"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
     <com.joey.xwebview.ui.XWebProgressBar

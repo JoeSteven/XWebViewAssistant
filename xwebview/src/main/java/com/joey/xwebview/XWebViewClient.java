@@ -17,13 +17,6 @@ public class XWebViewClient extends WebViewClient{
     }
 
     @Override
-    public boolean shouldOverrideUrlLoading(WebView view, String url) {
-        return xWebView.JSBridge() != null
-                && xWebView.JSBridge().checkJsBridge(url);
-
-    }
-
-    @Override
     public void onPageStarted(WebView view, String url, Bitmap favicon) {
         super.onPageStarted(view, url, favicon);
         xWebView.onProgressStart();

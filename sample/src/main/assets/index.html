@@ -33,23 +33,17 @@
             margin: 10px 20px;
         }
     </style>
+    <script src="./XWebViewJsBridgeCore.js"></script>
     <script type="text/javascript">
-        function callJava(callback, error_callback) {
-            let fuction_name = document.getElementById('input_fuction').value
+        function callJava() {
+            let function_name = document.getElementById('input_fuction').value
             let params = document.getElementById('input_params').value
 
-            let url =
-                `Xwebview://call_java/?callback=${callback||'successCallback'}&error_callback=${error_callback||'errorCallback'}&func=${fuction_name}&params=${params||'{}'}`
-            console.log(url)
-            window.location = url
+            window.invokeJavaFunc(function_name, JSON.parse(params), callback)
         }
 
-        function successCallback() {
-            alert("success callback!");
-        }
-
-        function errorCallback() {
-            alert("error callback!");
+        function callback(data) {
+           alert(data.message);
         }
 
         function msg(msg) {

@@ -1,6 +1,9 @@
 package com.joey.xwebview.jsbridge.method;
 
 import com.joey.xwebview.XWebView;
+import com.joey.xwebview.jsbridge.JSBridgeCore;
+
+import org.json.JSONObject;
 
 /**
  * Description: Java Method for JS
@@ -10,15 +13,15 @@ import com.joey.xwebview.XWebView;
 public abstract class XJavaMethod {
     protected XWebView webView;
 
-    public void invoke(JSMessage message, XWebView webView) {
+    public JSONObject invoke(JSMessage message, XWebView webView) throws Exception{
         this.webView = webView;
-        call(message);
+        return call(message, new JSONObject());
     }
 
     /**
      * implements this method for JS
      */
-    public abstract void call(JSMessage message);
+    public abstract JSONObject call(JSMessage message, JSONObject callbackParams) throws Exception;
 
     /**
      * @return permission need for this method
@@ -26,25 +29,21 @@ public abstract class XJavaMethod {
     public abstract Permission permission();
 
     /**
-     * call this method to notify js after success
-     * @param callback
-     * @param callbackMessage
+     * call this method to notify js after execute
+     * @param callbackID
+     * @param params
      */
-    protected void callback(String callback, String...callbackMessage) {
+    protected void callback(String callbackID, JSONObject params) {
         if (webView != null) {
-            webView.invokeJavaScript(callback, callbackMessage);
+            webView.invokeJsCallback(callbackID, JSBridgeCore.STATUS_SUCCESS,"success", params);
         }
     }
 
-    /**
-     * call this method to notify js when error occur
-     */
-    protected void callError(String callError, String...errorParams) {
+    protected void callError(String callbackID, String errorMessage) {
         if (webView != null) {
-            webView.invokeJavaScript(callError, errorParams);
+            webView.invokeJsCallback(callbackID, JSBridgeCore.STATUS_ERROR,errorMessage, null);
         }
     }
-
 
     public void release() {
         webView = null;

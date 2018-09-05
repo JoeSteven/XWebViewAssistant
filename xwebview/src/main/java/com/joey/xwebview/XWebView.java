@@ -17,6 +17,8 @@ import com.joey.xwebview.jsbridge.method.IAuthorizedChecker;
 import com.joey.xwebview.ui.IWebProgress;
 import com.joey.xwebview.ui.IWebTitle;
 
+import org.json.JSONObject;
+
 import java.util.Map;
 
 /**
@@ -29,6 +31,7 @@ public class XWebView implements LifecycleObserver, IWebProgress, IWebTitle {
     private IWebProgress webProgress;
     private IWebTitle webTitle;
     private JSBridgeCore jsBridgeCore;
+    private final String JAVA_FUNC_FOR_JS = "javaObject";
 
     public static XWebView with(WebView webView, LifecycleOwner owner) {
         return new XWebView(webView, owner);
@@ -63,6 +66,10 @@ public class XWebView implements LifecycleObserver, IWebProgress, IWebTitle {
         if (jsBridgeCore != null) jsBridgeCore.invokeJavaScript(func, params);
     }
 
+    public void invokeJsCallback(String id, int statusCode, String message, JSONObject params) {
+        if (jsBridgeCore != null) jsBridgeCore.invokeJSCallback(id, statusCode, message, params);
+    }
+
     public boolean goBack() {
         if (webView().canGoBack()) {
             webView().goBack();
@@ -95,6 +102,10 @@ public class XWebView implements LifecycleObserver, IWebProgress, IWebTitle {
         return webView;
     }
 
+    public void reload() {
+        webView().reload();
+    }
+
 
     /********************* setters ***************************/
     public XWebView setCacheMode(int mode) {
@@ -108,9 +119,10 @@ public class XWebView implements LifecycleObserver, IWebProgress, IWebTitle {
         return this;
     }
 
-    public XWebView setJSBridgeEnabled(JSBridgeRegister register, String schema) {
+    public XWebView setJSBridgeEnabled(JSBridgeRegister register) {
+        webView().removeJavascriptInterface(JAVA_FUNC_FOR_JS);
         jsBridgeCore = new JSBridgeCore(register, this);
-        jsBridgeCore.setBridgeSchema(schema);
+        webView().addJavascriptInterface(jsBridgeCore, JAVA_FUNC_FOR_JS);
         return this;
     }
 
@@ -166,6 +178,14 @@ public class XWebView implements LifecycleObserver, IWebProgress, IWebTitle {
     }
 
 
+    public XWebView disableJSBridge() {
+        webView().removeJavascriptInterface(JAVA_FUNC_FOR_JS);
+        jsBridgeCore.release();
+        jsBridgeCore = null;
+        return this;
+    }
+
+
     /********************* Lifecycle ***************************/
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     public void onResume() {
@@ -182,6 +202,7 @@ public class XWebView implements LifecycleObserver, IWebProgress, IWebTitle {
         if (jsBridgeCore != null) jsBridgeCore.release();
         webView().removeAllViews();
         webView().destroy();
+        webView().removeJavascriptInterface(JAVA_FUNC_FOR_JS);
         webProgress = null;
         webTitle = null;
         jsBridgeCore = null;

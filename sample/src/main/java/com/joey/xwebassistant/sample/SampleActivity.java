@@ -9,9 +9,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.View;
 import android.webkit.WebSettings;
+import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.joey.xwebassistant.sample.JavaMethod.JSAsyncFunc;
 import com.joey.xwebassistant.sample.JavaMethod.JSToast;
 import com.joey.xwebassistant.sample.JavaMethod.JSToastAuthorized;
 import com.joey.xwebassistant.sample.JavaMethod.JSToastPrivate;
@@ -32,13 +34,13 @@ public class SampleActivity extends AppCompatActivity implements IWebTitle {
     private Pattern whiteListPattern;
     private Button btnWhiteList;
     private Button btnAuthorized;
-    private final String SCHEMA = "xwebview";
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample);
+        WebView.setWebContentsDebuggingEnabled(true);
         etUrl = findViewById(R.id.et_url);
         etJs = findViewById(R.id.et_js);
 
@@ -46,14 +48,14 @@ public class SampleActivity extends AppCompatActivity implements IWebTitle {
                 .setWebTitleEnable(this)
                 .setCacheMode(WebSettings.LOAD_NO_CACHE)
                 .setProgressEnable(findViewById(R.id.progress_bar))
-                .setJSBridgeEnabled(register(), SCHEMA)
+                .setJSBridgeEnabled(register())
                 .setJSBridgeAuthorizedChecker(this::isAuthorized)
                 .loadUrl("file:///android_asset/index.html");
 
         etUrl.setText("file:///android_asset/index.html");
         findViewById(R.id.btn_load).setOnClickListener(this::load);
         findViewById(R.id.btn_input).setOnClickListener(v->
-                webView.invokeJavaScript("msg", etJs.getText().toString()));
+                webView.invokeJavaScript("msg", "'"+etJs.getText().toString()+"'"));
         btnWhiteList = findViewById(R.id.btn_whitelist);
         btnWhiteList.setOnClickListener(this::addWhiteList);
         btnAuthorized = findViewById(R.id.btn_authorized);
@@ -69,6 +71,7 @@ public class SampleActivity extends AppCompatActivity implements IWebTitle {
                 .register("toast_public", JSToastPublic.class)
                 .register("toast_private", JSToastPrivate.class)
                 .register("toast_authorized", JSToastAuthorized.class)
+                .register("async_task", JSAsyncFunc.class)
                 .setMethodInitializer((func, method) -> {
                     if (method instanceof JSToast)
                         ((JSToast) method).setContext(SampleActivity.this);
@@ -137,7 +140,8 @@ public class SampleActivity extends AppCompatActivity implements IWebTitle {
             }
         }
 
-        webView.setJSBridgeEnabled(register(), SCHEMA)
+        webView.setJSBridgeEnabled(register())
                 .setJSBridgeAuthorizedChecker(this::isAuthorized);
+        webView.reload();
     }
 }

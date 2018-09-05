@@ -1,8 +1,11 @@
 package com.joey.xwebassistant.sample.JavaMethod;
 
+import android.text.TextUtils;
 import android.widget.Toast;
 
 import com.joey.xwebview.jsbridge.method.JSMessage;
+
+import org.json.JSONObject;
 
 /**
  * Description:
@@ -12,13 +15,11 @@ import com.joey.xwebview.jsbridge.method.JSMessage;
 public class JSToastAuthorized extends JSToast{
 
     @Override
-    public void call(JSMessage message) {
-        if (context != null){
-            Toast.makeText(context, message.params.optString("message"), Toast.LENGTH_SHORT).show();
-            callback(message.callback, "call JSToastAuthorized success");
-        } else {
-            callError(message.errorCallback, "call JSToastAuthorized failed! context is null!");
-        }
+    public JSONObject call(JSMessage message, JSONObject callbackParams) throws Exception{
+        if (TextUtils.isEmpty(message.params.optString("message"))) throw new Exception("no message found from js");
+        Toast.makeText(context, message.params.optString("message"), Toast.LENGTH_SHORT).show();
+        // return callbackPrams to invoke js callback
+        return callbackParams.put("message", "invoke JsToastAuthorized success");
     }
 
     @Override
