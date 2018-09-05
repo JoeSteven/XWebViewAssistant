@@ -3,7 +3,9 @@
 **注意：本库底层实现为 @JavascriptInterface 的方式因此只支持到minsdk-18，截止到今天（2018.9.5）minsdk-18 已覆盖90%手机。这种方式相比拦截URL的方式效率上高得多，耗时更低**
 本库采用注册的方式来给前端页面提供 Java 方法，尽量实现每个方法逻辑单一，可复用，便于权限管理提供安全性
 
-### 1.实现 Java 方法
+### 客户端文档
+
+#### 1.实现 Java 方法
 
 提供给 JS 调用的方法需要继承 `XJavaMethod` ，实现两个方法，`call` 和`permission`。
 
@@ -25,7 +27,7 @@ public class JSToastPublic extends XJavaMethod{
         Toast.makeText(context, 
                        message.params.optString("message"),
                        Toast.LENGTH_SHORT).show();
-      
+     	
       // 同步回调
         return callbackParams.put("message", "invoke JSToastPublic success");
     }
@@ -37,7 +39,35 @@ public class JSToastPublic extends XJavaMethod{
 }
 ```
 
-### 2.权限管理
+- 异步回调
+
+```java
+public JSONObject call(JSMessage message, JSONObject callbackParams) throws Exception{ 
+	//异步代码中回调
+  	...//success
+  		callback(message.callbackID, callbackParams.put("message", "success"));
+  		//error
+  		callError(message.callbackID, exception.toString());
+	...
+    // 必须返回 null， 否则会立即回调
+	return null；
+} 
+```
+
+- JSMessage
+
+```JAVA
+public class JSMessage {
+    public JSMessage() {}
+
+    public String hostUrl;// 当前调用该方法的页面url
+    public String callbackID;// 回调id，id为"-1"则说明无需回调
+    public String javaMethod;// 调用的 Java 名称（注册时的名称，并不是真实的函数名）
+    public JSONObject params;// 参数
+}
+```
+
+#### 2.权限管理
 
 每一个注册的 Java 方法都必须指定调用权限
 
@@ -60,7 +90,7 @@ public interface IAuthorizedChecker {
 xWeb.setJSBridgeAuthorizedChecker(checker);
 ```
 
-### 3.构造 `JSBridgeRegister`， 注册 Java 方法
+#### 3.构造 `JSBridgeRegister`， 注册 Java 方法
 
 ```java
 JSBridgeRegister register = JSBridgeRegister.create()
@@ -71,7 +101,7 @@ JSBridgeRegister register = JSBridgeRegister.create()
 		.whiteListPattern(Pattern.compile("file:///android_asset.*"));
 ```
 
-### 4.`IMethodInitializer` 方法初始化器
+#### 4.`IMethodInitializer` 方法初始化器
 
 如果注册的 Java 方法依赖外界注入参数，可以通过设置方法初始化接口，在创建该方法实例后注入参数等
 
@@ -82,35 +112,35 @@ register.setMethodInitializer((func, method) -> {
                 });
 ```
 
-### 5.实现 JSBridge 协议解析接口
+#### 5.开启`JSBridge`
 
 ```java
-// 拦截url的方式实现JSBridge
-public interface IJSBridgeUrlParser {
-    JSMessage parse(String url);
-}
-
-// 拦截onJsPrompt的方式实现
-public interface IJSBridgePromptParser {
-    JSMessage parse(String url, String message, String defaultValue, JsPromptResult result);
-}
-
-// 满足协议则返回一个 JSMessage 对象，否则返回null
-public class JSMessage {
-    public String hostUrl;// 调用该方法的网页url，可选
-    public String callback;// 执行成功后需要回调的JS函数,可选
-    public String errorCallback;// 异常发生时回调的JS函数，可选
-    public String javaMethod;// 要调用的Java方法，必须
-    public JSONObject params;// Java方法所需要的参数,Json格式，可选
-}
+xWeb.setJSBridgeUrlEnabled(register）
 ```
 
-### 6.开启`JSBridge`
+### 前端文档
 
-```java
-xWeb.setJSBridgeUrlEnabled(register, urlParser
-  //.setJSBridgePromptEnabled(register, promptParser)
-  .setJSBridgeAuthorizedChecker(checker);//可选
+实现 JsBridge 的文件为 XWebViewJsBridgeCore.js，在本仓库`xwebview/src/main/assets/XWebViewJsBridgeCore.js`
+
+```javascript
+// 调用java 方法
+// func - 注册的 java 方法名，string
+// params - 参数，JSON
+// callback - 回调， function 可选
+window.invokeJavaFunc(func, params, callback)
+
+// 回调函数，接收参数为JSON
+function callback(data){
+    ...
+}
+
+// 回调数据格式，
+{
+    "status": 0, // 0 - 成功，1-失败
+    "message": "success", // 状态信息，例如失败后的异常信息
+    "params": { // 数据
+        "user": "xxx", 
+        "age": 20
+    }
+}
 ```
-
-**注意：拦截url和拦截 prompt 方案只能二选一，调用了其中一个就不能开启另外一个**

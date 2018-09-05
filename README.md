@@ -25,9 +25,11 @@ allprojects {
 
 在项目build.gradle
 
+`latest-version` 请在release-note中查看
+
 ```java
 dependencies {
-	implementation 'com.github.JoeSteven:XWebViewAssistant:1.0'
+	implementation 'com.github.JoeSteven:XWebViewAssistant:latest-version'
 }
 ```
 
